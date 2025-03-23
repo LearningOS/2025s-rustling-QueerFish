@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: Ord + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: Ord + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -71,13 +70,42 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut merged_list = LinkedList::new();
+
+        // 获取 list_a 和 list_b 的头部指针
+        let mut a_ptr = list_a.start;
+        let mut b_ptr = list_b.start;
+
+        unsafe {
+            while let (Some(a), Some(b)) = (a_ptr, b_ptr) {
+                let a_ref = a.as_ref();
+                let b_ref = b.as_ref();
+
+                if a_ref.val <= b_ref.val {
+                    merged_list.add(a_ref.val.clone());
+                    a_ptr = a_ref.next;
+                } else {
+                    merged_list.add(b_ref.val.clone());
+                    b_ptr = b_ref.next;
+                }
+            }
+            // 处理 list_a 剩余部分
+            while let Some(a) = a_ptr {
+                let a_ref = a.as_ref();
+                merged_list.add(a_ref.val.clone());
+                a_ptr = a_ref.next;
+            }
+
+            // 处理 list_b 剩余部分
+            while let Some(b) = b_ptr {
+                let b_ref = b.as_ref();
+                merged_list.add(b_ref.val.clone());
+                b_ptr = b_ref.next;
+            }
         }
-	}
+
+        merged_list
+    }
 }
 
 impl<T> Display for LinkedList<T>
